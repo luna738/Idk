@@ -1,41 +1,265 @@
-# Compiled Lua sources
-luac.out
 
-# luarocks build files
-*.src.rock
-*.zip
-*.tar.gz
+local function createUIElement(className, properties, parent)
+    local element = Instance.new(className)
+    for prop, value in pairs(properties) do
+        element[prop] = value
+    end
+    element.Parent = parent
+    return element
+end
 
-# Object files
-*.o
-*.os
-*.ko
-*.obj
-*.elf
+local ScreenGui = createUIElement("ScreenGui", {Parent = game.CoreGui, Name = "WaveAIExecutorGui"}, nil)
+local MainFrame = createUIElement("Frame", {
+    BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+    BorderSizePixel = 0,
+    Position = UDim2.new(0.25, 0, 0.25, 0),
+    Size = UDim2.new(0.5, 0, 0.7, 0),
+    ClipsDescendants = true,
+    ZIndex = 2
+}, ScreenGui)
+local TitleBar = createUIElement("Frame", {
+    BackgroundColor3 = Color3.fromRGB(35, 35, 35),
+    BorderSizePixel = 0,
+    Size = UDim2.new(1, 0, 0.1, 0),
+    ZIndex = 3
+}, MainFrame)
+local TitleLabel = createUIElement("TextLabel", {
+    BackgroundColor3 = Color3.fromRGB(35, 35, 35),
+    BorderSizePixel = 0,
+    Position = UDim2.new(0.02, 0, 0, 0),
+    Size = UDim2.new(0.7, 0, 1, 0),
+    Font = Enum.Font.SourceSansBold,
+    Text = "Wave AI Script Executor",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 20,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 4
+}, TitleBar)
+local MinimizeButton = createUIElement("TextButton", {
+    BackgroundColor3 = Color3.fromRGB(255, 255, 0),
+    BorderSizePixel = 0,
+    Position = UDim2.new(0.75, 0, 0, 0),
+    Size = UDim2.new(0.1, 0, 1, 0),
+    Font = Enum.Font.SourceSansBold,
+    Text = "_",
+    TextColor3 = Color3.fromRGB(0, 0, 0),
+    TextSize = 20,
+    ZIndex = 4
+}, TitleBar)
+local CloseButton = createUIElement("TextButton", {
+    BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+    BorderSizePixel = 0,
+    Position = UDim2.new(0.87, 0, 0, 0),
+    Size = UDim2.new(0.1, 0, 1, 0),
+    Font = Enum.Font.SourceSansBold,
+    Text = "X",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 20,
+    ZIndex = 4
+}, TitleBar)
+local TextBox = createUIElement("TextBox", {
+    BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+    BorderSizePixel = 0,
+    Position = UDim2.new(0.05, 0, 0.15, 0),
+    Size = UDim2.new(0.9, 0, 0.35, 0),
+    Font = Enum.Font.Code,
+    PlaceholderText = "Enter your script here...",
+    Text = "",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 14,
+    TextWrapped = true,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    TextYAlignment = Enum.TextYAlignment.Top,
+    ClearTextOnFocus = false,
+    ZIndex = 2
+}, MainFrame)
+local ExecuteButton = createUIElement("TextButton", {
+    BackgroundColor3 = Color3.fromRGB(0, 170, 0),
+    BorderSizePixel = 0,
+    Position = UDim2.new(0.05, 0, 0.53, 0),
+    Size = UDim2.new(0.4, 0, 0.1, 0),
+    Font = Enum.Font.SourceSansBold,
+    Text = "Execute",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 18,
+    ZIndex = 2
+}, MainFrame)
+local StatusLabel = createUIElement("TextLabel", {
+    BackgroundColor3 = Color3.fromRGB(35, 35, 35),
+    BorderSizePixel = 0,
+    Position = UDim2.new(0.05, 0, 0.92, 0),
+    Size = UDim2.new(0.9, 0, 0.05, 0),
+    Font = Enum.Font.SourceSans,
+    Text = "",
+    TextColor3 = Color3.fromRGB(255, 0, 0),
+    TextSize = 14,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 2
+}, MainFrame)
+local AIInputBox = createUIElement("TextBox", {
+    BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+    BorderSizePixel = 0,
+    Position = UDim2.new(0.05, 0, 0.65, 0),
+    Size = UDim2.new(0.9, 0, 0.1, 0),
+    Font = Enum.Font.SourceSans,
+    PlaceholderText = "Enter your natural language command...",
+    Text = "",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 14,
+    TextWrapped = true,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    TextYAlignment = Enum.TextYAlignment.Center,
+    ClearTextOnFocus = false,
+    ZIndex = 2
+}, MainFrame)
+local AISubmitButton = createUIElement("TextButton", {
+    BackgroundColor3 = Color3.fromRGB(0, 170, 0),
+    BorderSizePixel = 0,
+    Position = UDim2.new(0.05, 0, 0.77, 0),
+    Size = UDim2.new(0.4, 0, 0.1, 0),
+    Font = Enum.Font.SourceSansBold,
+    Text = "Generate Script",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 18,
+    ZIndex = 2
+}, MainFrame)
+local AICodeLabel = createUIElement("TextLabel", {
+    BackgroundColor3 = Color3.fromRGB(35, 35, 35),
+    BorderSizePixel = 0,
+    Position = UDim2.new(0.5, 0, 0.77, 0),
+    Size = UDim2.new(0.45, 0, 0.1, 0),
+    Font = Enum.Font.Code,
+    Text = "",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 14,
+    TextWrapped = true,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    TextYAlignment = Enum.TextYAlignment.Center,
+    ZIndex = 2
+}, MainFrame)
+local AIExecuteButton = createUIElement("TextButton", {
+    BackgroundColor3 = Color3.fromRGB(0, 170, 0),
+    BorderSizePixel = 0,
+    Position = UDim2.new(0.75, 0, 0.77, 0),
+    Size = UDim2.new(0.2, 0, 0.1, 0),
+    Font = Enum.Font.SourceSansBold,
+    Text = "Run Script",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 18,
+    ZIndex = 2
+}, MainFrame)
 
-# Precompiled Headers
-*.gch
-*.pch
+local minimized = false
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-*.def
-*.exp
+MinimizeButton.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        MainFrame.Size = UDim2.new(0.5, 0, 0.1, 0)
+        TextBox.Visible = false
+        ExecuteButton.Visible = false
+        StatusLabel.Visible = false
+        AIInputBox.Visible = false
+        AISubmitButton.Visible = false
+        AICodeLabel.Visible = false
+        AIExecuteButton.Visible = false
+    else
+        MainFrame.Size = UDim2.new(0.5, 0, 0.7, 0)
+        TextBox.Visible = true
+        ExecuteButton.Visible = true
+        StatusLabel.Visible = true
+        AIInputBox.Visible = true
+        AISubmitButton.Visible = true
+        AICodeLabel.Visible = true
+        AIExecuteButton.Visible = true
+    end
+end)
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+AISubmitButton.MouseButton1Click:Connect(function()
+    local command = AIInputBox.Text:lower()
+    local generatedScript = ""
+    local username = string.match(command, "\"(.-)\"") or (string.find(command, "me") and game.Players.LocalPlayer.Name)
 
+    if string.find(command, "jump power") or string.find(command, "zıplama gücü") then
+        local jumpPower = tonumber(string.match(command, "%d+"))
+        if jumpPower then
+            generatedScript = "game.Players.LocalPlayer.Character.Humanoid.JumpPower = " .. jumpPower
+        end
+    elseif string.find(command, "walkspeed") or string.find(command, "yürüyüş hızı") then
+        local walkSpeed = tonumber(string.match(command, "%d+"))
+        if walkSpeed then
+            generatedScript = "game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = " .. walkSpeed
+        end
+    elseif string.find(command, "tp me") or string.find(command, "ışınla beni") then
+        local username = string.match(command, "\"(.-)\"")
+        if username then
+            generatedScript = [[
+                local playerName = "]] .. username .. [["
+                local player = game.Players:FindFirstChild(playerName)
+                if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+                end
+            ]]
+        end
+    elseif username then
+        if string.find(command, "kill") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character and player.Character:FindFirstChild('Humanoid') then player.Character.Humanoid.Health = 0 end"
+        elseif string.find(command, "sparkles") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character then Instance.new('Sparkles', player.Character) end"
+        elseif string.find(command, "unsparkles") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character then for _,v in pairs(player.Character:GetChildren()) do if v:IsA('Sparkles') then v:Destroy() end end end"
+        elseif string.find(command, "sit") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character and player.Character:FindFirstChild('Humanoid') then player.Character.Humanoid.Sit = true end"
+        elseif string.find(command, "ff") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character then Instance.new('ForceField', player.Character) end"
+        elseif string.find(command, "unff") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character then for _,v in pairs(player.Character:GetChildren()) do if v:IsA('ForceField') then v:Destroy() end end end"
+        elseif string.find(command, "fire") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character then Instance.new('Fire', player.Character) end"
+        elseif string.find(command, "unfire") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character then for _,v in pairs(player.Character:GetChildren()) do if v:IsA('Fire') then v:Destroy() end end end"
+        elseif string.find(command, "smoke") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character then Instance.new('Smoke', player.Character) end"
+        elseif string.find(command, "unsmoke") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character then for _,v in pairs(player.Character:GetChildren()) do if v:IsA('Smoke') then v:Destroy() end end end"
+        elseif string.find(command, "loopkill") then
+            generatedScript = "while wait(1) do local player = game.Players:FindFirstChild('"..username.."') if player and player.Character and player.Character:FindFirstChild('Humanoid') then player.Character.Humanoid.Health = 0 end end"
+        elseif string.find(command, "unjail") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character then for _,v in pairs(player.Character:GetChildren()) do if v.Name == 'Jail' then v:Destroy() end end end"
+        elseif string.find(command, "minihead") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character and player.Character:FindFirstChild('Head') then player.Character.Head.Mesh.Scale = Vector3.new(0.5, 0.5, 0.5) end"
+        elseif string.find(command, "bighead") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character and player.Character:FindFirstChild('Head') then player.Character.Head.Mesh.Scale = Vector3.new(2, 2, 2) end"
+        elseif string.find(command, "jump") then
+            generatedScript = "local player = game.Players:FindFirstChild('"..username.."') if player and player.Character and player.Character:FindFirstChild('Humanoid') then player.Character.Humanoid.Jump = true end"
+        end
+    end
+
+    if generatedScript ~= "" then
+        AICodeLabel.Text = generatedScript
+    else
+        AICodeLabel.Text = "Could not understand the command."
+    end
+end)
+
+AIExecuteButton.MouseButton1Click:Connect(function()
+    local scriptContent = AICodeLabel.Text
+    if scriptContent ~= "" and scriptContent ~= "Could not understand the command." then
+        local success, errorMessage = pcall(function()
+            loadstring(scriptContent)()
+        end)
+        if success then
+            StatusLabel.Text = "Script executed successfully!"
+            StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        else
+            StatusLabel.Text = "Error: " .. errorMessage
+            StatusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        end
+    else
+        StatusLabel.Text = "No valid script to execute."
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+    end
+end)
